@@ -8,7 +8,7 @@ const isValid = (value) => {
     return /^[0-9]{6}$/.test(num);
   }
 
-  const validName = (name) => {
+  const isValidName = (name) => {
     return /^[a-zA-Z\. ]*$/.test(name)
   }
   
@@ -45,6 +45,6 @@ const isValid = (value) => {
   }
 
   module.exports = {isValid,isValidPincode,isValidBody,isValidPhone,isValidEmail,
-    isValidPwd,isValidObjectId,isValidPrice,isValidSize,isValidNum,validName}
+    isValidPwd,isValidObjectId,isValidPrice,isValidSize,isValidNum,isValidName}
 
 
