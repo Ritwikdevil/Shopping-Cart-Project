@@ -62,7 +62,7 @@ const createUser = async function(req,res) {
     profileImage = profileImgUrl;
     
     //hashing the password with bcrypt
-    password = await bcrypt.hash(data.password, 10);
+    password = await bcrypt.hash(password, 10);
 
     let responseData = await User.create(data);
     res.status(201).send({ status: true, message: "User created successfully", data: responseData })
