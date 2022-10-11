@@ -149,6 +149,8 @@ const updateUser = async function (req, res) {
     let uploadedFileURL = await aws.uploadFile(files[0])
     data.profileImage = uploadedFileURL
   }
+  if (validation.isValidBody(data)) return res.status(400).send({ status: false, message: "Enter details to update your account" });
+  let userProfile = await User.findById(userId);
   if(fname) {
     if (!validation.isValid(fname)) return res.status(400).send({ status: false, message: "first name is required" })
     if (!validation.isValidName(fname)) return res.status(400).send({ status: false, message: "first name is not valid" })
@@ -166,6 +168,8 @@ const updateUser = async function (req, res) {
   if(password) {
     if (!validation.isValid(password)) return res.status(400).send({ status: false, message: "Pasworrd is required or not valid" })
     if (!validation.isValidPwd(password)) return res.status(400).send({ status: false, message: "Password length should be 8 to 15 digits and enter atleast one uppercase also one special character" })
+
+    data.password = await bcrypt.hash(data.password, 10);
   }
   if(phone) {
     if (!validation.isValid(phone)) return res.status(400).send({ status: false, message: "phone is required or not valid" })
@@ -182,4 +186,4 @@ const updateUser = async function (req, res) {
   }
 }
 
-module.exports = { createUser, loginUser, getUser }
+module.exports = { createUser, loginUser, getUser,updateUser }

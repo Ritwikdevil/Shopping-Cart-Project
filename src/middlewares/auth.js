@@ -28,7 +28,7 @@ const authorization = async (req, res, next) => {
     let loginUser;
     
     if(req.params?.userId){
-      if(!validate.isValidObjectId(req.params.userId)) return res.status(400).send({ status: false, message: "Enter a valid user Id" })
+      if(!validation.isValidObjectId(req.params.userId)) return res.status(400).send({ status: false, message: "Enter a valid user Id" })
       let checkUserId = await User.findById(req.params.userId);
       if(!checkUserId) return res.status(404).send({ status: false, message: "User not found" });
       loginUser = checkUserId._id.toString();
