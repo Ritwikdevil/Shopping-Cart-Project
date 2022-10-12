@@ -41,12 +41,16 @@ const isValid = (value) => {
   const isValidSize = (sizes) => {
     return ["S", "XS","M","X", "L","XXL", "XL"].includes(sizes);
   }
+
+  const isValidString = (String) => {
+    return /\d/.test(String)
+  }
   
   const isValidNum = (num) => {
     return /^[0-9]*[1-9]+$|^[1-9]+[0-9]*$/.test(num);
   }
 
   module.exports = {isValid,isValidPincode,isValidBody,isValidPhone,isValidEmail,
-    isValidPwd,isValidObjectId,isValidPrice,isValidSize,isValidNum,isValidName}
+    isValidPwd,isValidObjectId,isValidPrice,isValidSize,isValidString,isValidNum,isValidName}
 
 

@@ -76,9 +76,9 @@ const createUser = async function (req, res) {
 
       return res.status(400).send({ msg: "No file found" })
     }
-    let uploadedFileURL = await aws.uploadFile(files[0])
+    let uploadedProfileImage = await aws.uploadFile(files[0])
 
-    data.profileImage = uploadedFileURL
+    data.profileImage = uploadedProfileImage
 
     const saltRounds = 10
     const hash = bcrypt.hashSync(password, saltRounds)
@@ -86,7 +86,7 @@ const createUser = async function (req, res) {
 
     data.address = addresss
     let createUser = await userModel.create(data)
-    return res.status(201).send({ status: true, message: "user created successfully", createUser })
+    return res.status(201).send({ status: true, message: "user created successfully", data:createUser })
 
   }
   catch (err) {
@@ -171,8 +171,6 @@ const updateUser = async function (req, res) {
     if (address) {
       address = JSON.parse(address)
 
-
-      // let addresss = JSON.parse(userProfile.address)
       if (!validation.isValid(address.shipping.street)) return res.status(400).send({ status: false, message: "street field is required or not valid" })
       if (!validation.isValid(address.shipping.city)) return res.status(400).send({ status: false, message: "city field is required or not valid" })
       if (!validation.isValid(address.shipping.pincode)) return res.status(400).send({ status: false, message: "pincode field is required or not valid" })
@@ -184,25 +182,19 @@ const updateUser = async function (req, res) {
       if (!validation.isValid(address.billing.pincode)) return res.status(400).send({ status: false, message: "pincode field is required or not valid" })
       if (!validation.isValidPincode(address.billing.pincode)) return res.status(400).send({ status: false, message: "PIN code should contain 6 digits only " })
 
-      // address = JSON.stringify(address)
     }
-    let data1 = {}
+
     if (files.length != 0) {
       if (files && files.length == 0) {
         return res.status(400).send({ msg: "No file found" })
       }
       let uploadedFileURL = await aws.uploadFile(files[0])
-      data1.profileImage = uploadedFileURL
+      data.profileImage = uploadedFileURL
     }
 
-    data1.fname = fname
-    data1.lname = lname
-    data1.email = email
-    data1.password = password
-    data1.phone = phone
-    data1.address = address
+    data.address = address
 
-    let updateUser = await userModel.findOneAndUpdate({ _id: userId }, { $set: data1 }, { new: true })
+    let updateUser = await userModel.findOneAndUpdate({ _id: userId }, { $set: data }, { new: true })
 
     res.status(200).send({ status: true, message: "User profile updated", data: updateUser })
 

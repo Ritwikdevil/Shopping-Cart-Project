@@ -8,7 +8,7 @@ const productSchema = new mongoose.Schema({
   currencyFormat: {type: String,required: true,trim: true,enum: ['₹'],},
   isFreeShipping: {type: Boolean,trim: true,default: false,},
   productImage: {type: String,required: true,trim: true},
-  style: {type: String,},
+  style: {type: String},
   availableSizes: {type: [String],enum: ["S", "XS","M","X", "L","XXL", "XL"],required: true,trim: true},
   installments: {type: Number},
   deletedAt: {type: Date,},
