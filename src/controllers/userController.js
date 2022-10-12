@@ -139,46 +139,69 @@ const updateUser = async function (req, res) {
     let data = req.body
     let files = req.files
     let userId = req.params.userId
-    if(files) {
-    if (files && files.length == 0) {
-      //upload to s3 and get the uploaded link
-      // res.send the link back to frontend/postman
+    let { fname, lname, email, password, phone, address } = data
+   if(files.length!=0) {
+      if (files && files.length == 0) {
+        //upload to s3 and get the uploaded link
+        // res.send the link back to frontend/postman
 
-      return res.status(400).send({ msg: "No file found" })
+        return res.status(400).send({ msg: "No file found" })
+      }
+      let uploadedFileURL = await aws.uploadFile(files[0])
+      data.profileImage = uploadedFileURL
+   }
+    if (validation.isValidBody(data)) return res.status(400).send({ status: false, message: "Enter details to update your account" });
+    let userProfile = await userModel.findById(userId);
+    if (fname) {
+      if (!validation.isValid(fname)) return res.status(400).send({ status: false, message: "first name is required" })
+      if (!validation.isValidName(fname)) return res.status(400).send({ status: false, message: "first name is not valid" })
     }
-    let uploadedFileURL = await aws.uploadFile(files[0])
-    data.profileImage = uploadedFileURL
-  }
-  if (validation.isValidBody(data)) return res.status(400).send({ status: false, message: "Enter details to update your account" });
-  let userProfile = await User.findById(userId);
-  if(fname) {
-    if (!validation.isValid(fname)) return res.status(400).send({ status: false, message: "first name is required" })
-    if (!validation.isValidName(fname)) return res.status(400).send({ status: false, message: "first name is not valid" })
-  }
-  if(lname) {
-    if (!validation.isValid(lname)) return res.status(400).send({ status: false, message: "last name is required" })
-    if (!validation.isValidName(lname)) return res.status(400).send({ status: false, message: "last name is not valid" })
-  }
-  if(email) {
-    if (!validation.isValid(email)) return res.status(400).send({ status: false, message: "email is required" })
-    if (!validation.isValidEmail(email)) return res.status(400).send({ status: false, message: "email is not valid" })
-    let checkEmail = await userModel.findOne({ email: email })
-    if (checkEmail) return res.status(409).send({ status: false, msg: "email already exist" })
-  }
-  if(password) {
-    if (!validation.isValid(password)) return res.status(400).send({ status: false, message: "Pasworrd is required or not valid" })
-    if (!validation.isValidPwd(password)) return res.status(400).send({ status: false, message: "Password length should be 8 to 15 digits and enter atleast one uppercase also one special character" })
+    if (lname) {
+      if (!validation.isValid(lname)) return res.status(400).send({ status: false, message: "last name is required" })
+      if (!validation.isValidName(lname)) return res.status(400).send({ status: false, message: "last name is not valid" })
+    }
+    if (email) {
+      if (!validation.isValid(email)) return res.status(400).send({ status: false, message: "email is required" })
+      if (!validation.isValidEmail(email)) return res.status(400).send({ status: false, message: "email is not valid" })
+      let checkEmail = await userModel.findOne({ email: email })
+      if (checkEmail) return res.status(409).send({ status: false, msg: "email already exist" })
+    }
+    if (password) {
+      if (!validation.isValid(password)) return res.status(400).send({ status: false, message: "Pasworrd is required or not valid" })
+      if (!validation.isValidPwd(password)) return res.status(400).send({ status: false, message: "Password length should be 8 to 15 digits and enter atleast one uppercase also one special character" })
 
-    data.password = await bcrypt.hash(data.password, 10);
-  }
-  if(phone) {
-    if (!validation.isValid(phone)) return res.status(400).send({ status: false, message: "phone is required or not valid" })
-    if (!validation.isValidNum(phone)) return res.status(400).send({ status: false, message: "phone number is not valid" })
-    let checkPhone = await userModel.findOne({ phone: phone })
-    if (checkPhone) return res.status(409).send({ status: false, msg: "Phone already exist" })
-  }
-  
+      data.password = await bcrypt.hash(data.password, 10);
+    }
+    if (phone) {
+      if (!validation.isValid(phone)) return res.status(400).send({ status: false, message: "phone is required or not valid" })
+      if (!validation.isValidNum(phone)) return res.status(400).send({ status: false, message: "phone number is not valid" })
+      let checkPhone = await userModel.findOne({ phone: phone })
+      if (checkPhone) return res.status(409).send({ status: false, msg: "Phone already exist" })
+    }
+    if (address) {
+      address = JSON.parse(data.address)
+      
+      
+      // let addresss = JSON.parse(userProfile.address)
+      if (!validation.isValid(address.shipping.street)) return res.status(400).send({ status: false, message: "street field is required or not valid" })
+      if (!validation.isValid(address.shipping.city)) return res.status(400).send({ status: false, message: "city field is required or not valid" })
+      if (!validation.isValid(address.shipping.pincode)) return res.status(400).send({ status: false, message: "pincode field is required or not valid" })
+      if (!validation.isValidPincode(address.shipping.pincode)) return res.status(400).send({ status: false, message: "PIN code should contain 6 digits only " })
 
+
+      if (!validation.isValid(address.billing.street)) return res.status(400).send({ status: false, message: "street field is required or not valid" })
+      if (!validation.isValid(address.billing.city)) return res.status(400).send({ status: false, message: "city field is required or not valid" })
+      if (!validation.isValid(address.billing.pincode)) return res.status(400).send({ status: false, message: "pincode field is required or not valid" })
+      if (!validation.isValidPincode(address.billing.pincode)) return res.status(400).send({ status: false, message: "PIN code should contain 6 digits only " })
+
+      address = JSON.stringify(address)
+    }
+   
+    // address = JSON.parse(address)
+
+    let updateUser = await userModel.findOneAndUpdate({ _id: userId }, data, { new: true })
+
+    res.status(200).send({ status: true, message: "User profile updated", data: updateUser })
 
 
   } catch (err) {
@@ -186,4 +209,4 @@ const updateUser = async function (req, res) {
   }
 }
 
-module.exports = { createUser, loginUser, getUser,updateUser }
+module.exports = { createUser, loginUser, getUser, updateUser }
