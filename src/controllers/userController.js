@@ -140,18 +140,8 @@ const updateUser = async function (req, res) {
     let files = req.files
     let userId = req.params.userId
     let { fname, lname, email, password, phone, address } = data
-   if(files.length!=0) {
-      if (files && files.length == 0) {
-        //upload to s3 and get the uploaded link
-        // res.send the link back to frontend/postman
 
-        return res.status(400).send({ msg: "No file found" })
-      }
-      let uploadedFileURL = await aws.uploadFile(files[0])
-      data.profileImage = uploadedFileURL
-   }
     if (validation.isValidBody(data)) return res.status(400).send({ status: false, message: "Enter details to update your account" });
-    let userProfile = await userModel.findById(userId);
     if (fname) {
       if (!validation.isValid(fname)) return res.status(400).send({ status: false, message: "first name is required" })
       if (!validation.isValidName(fname)) return res.status(400).send({ status: false, message: "first name is not valid" })
@@ -180,8 +170,8 @@ const updateUser = async function (req, res) {
     }
     if (address) {
       address = JSON.parse(data.address)
-      
-      
+
+
       // let addresss = JSON.parse(userProfile.address)
       if (!validation.isValid(address.shipping.street)) return res.status(400).send({ status: false, message: "street field is required or not valid" })
       if (!validation.isValid(address.shipping.city)) return res.status(400).send({ status: false, message: "city field is required or not valid" })
@@ -194,12 +184,25 @@ const updateUser = async function (req, res) {
       if (!validation.isValid(address.billing.pincode)) return res.status(400).send({ status: false, message: "pincode field is required or not valid" })
       if (!validation.isValidPincode(address.billing.pincode)) return res.status(400).send({ status: false, message: "PIN code should contain 6 digits only " })
 
-      address = JSON.stringify(address)
+      // address = JSON.stringify(address)
     }
-   
-    // address = JSON.parse(address)
+    let data1 = {}
+    if (files.length != 0) {
+      if (files && files.length == 0) {
+        return res.status(400).send({ msg: "No file found" })
+      }
+      let uploadedFileURL = await aws.uploadFile(files[0])
+      data1.profileImage = uploadedFileURL
+    }
 
-    let updateUser = await userModel.findOneAndUpdate({ _id: userId }, data, { new: true })
+    data1.fname = fname
+    data1.lname = lname
+    data1.email = email
+    data1.password = password
+    data1.phone = phone
+    data1.address = address
+
+    let updateUser = await userModel.findOneAndUpdate({ _id: userId }, { $set: data1 }, { new: true })
 
     res.status(200).send({ status: true, message: "User profile updated", data: updateUser })
 
