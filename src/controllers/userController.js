@@ -169,7 +169,7 @@ const updateUser = async function (req, res) {
       if (checkPhone) return res.status(409).send({ status: false, msg: "Phone already exist" })
     }
     if (address) {
-      address = JSON.parse(data.address)
+      address = JSON.parse(address)
 
 
       // let addresss = JSON.parse(userProfile.address)
