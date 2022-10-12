@@ -13,14 +13,14 @@ const createUser = async function (req, res) {
 
     if (validation.isValidBody(data)) return res.status(400).send({ status: false, msg: "please provide  details" })
 
-    if (!validation.isValid(fname)) return res.status(400).send({ status: false, message: "first name is required or not valid" })
+    if (!validation.isValid(fname)) return res.status(400).send({ status: false, message: "first name is required" })
     if (!validation.isValidName(fname)) return res.status(400).send({ status: false, message: "first name is not valid" })
 
-    if (!validation.isValid(lname)) return res.status(400).send({ status: false, message: "last name is required or not valid" })
+    if (!validation.isValid(lname)) return res.status(400).send({ status: false, message: "last name is required" })
     if (!validation.isValidName(lname)) return res.status(400).send({ status: false, message: "last name is not valid" })
 
 
-    if (!validation.isValid(email)) return res.status(400).send({ status: false, message: "email is required or not valid" })
+    if (!validation.isValid(email)) return res.status(400).send({ status: false, message: "email is required" })
 
     if (!validation.isValidEmail(email)) return res.status(400).send({ status: false, message: "email is not valid" })
 
@@ -30,13 +30,13 @@ const createUser = async function (req, res) {
 
 
 
-    if (!validation.isValid(password)) return res.status(400).send({ status: false, message: "Pasworrd is required or not valid" })
+    if (!validation.isValid(password)) return res.status(400).send({ status: false, message: "Pasworrd is required" })
 
     if (!validation.isValidPwd(password)) return res.status(400).send({ status: false, message: "Password length should be 8 to 15 digits and enter atleast one uppercase also one special character" })
 
 
 
-    if (!validation.isValid(phone)) return res.status(400).send({ status: false, message: "phone is required or not valid" })
+    if (!validation.isValid(phone)) return res.status(400).send({ status: false, message: "phone is required" })
 
     if (!validation.isValidNum(phone)) return res.status(400).send({ status: false, message: "phone number is not valid" })
 
@@ -49,31 +49,28 @@ const createUser = async function (req, res) {
     var addresss = JSON.parse(address)
 
 
-    if (!validation.isValid(addresss.shipping.street)) return res.status(400).send({ status: false, message: "street field is required or not valid" })
+    if (!validation.isValid(addresss.shipping.street)) return res.status(400).send({ status: false, message: "street field is required" })
 
-    if (!validation.isValid(addresss.shipping.city)) return res.status(400).send({ status: false, message: "city field is required or not valid" })
+    if (!validation.isValid(addresss.shipping.city)) return res.status(400).send({ status: false, message: "city field is required" })
 
-    if (!validation.isValid(addresss.shipping.pincode)) return res.status(400).send({ status: false, message: "pincode field is required or not valid" })
+    if (!validation.isValid(addresss.shipping.pincode)) return res.status(400).send({ status: false, message: "pincode field is required" })
 
     if (!validation.isValidPincode(addresss.shipping.pincode)) return res.status(400).send({ status: false, message: "PIN code should contain 6 digits only " })
 
 
 
 
-    if (!validation.isValid(addresss.billing.street)) return res.status(400).send({ status: false, message: "street field is required or not valid" })
+    if (!validation.isValid(addresss.billing.street)) return res.status(400).send({ status: false, message: "street field is required" })
 
-    if (!validation.isValid(addresss.billing.city)) return res.status(400).send({ status: false, message: "city field is required or not valid" })
+    if (!validation.isValid(addresss.billing.city)) return res.status(400).send({ status: false, message: "city field is required" })
 
-    if (!validation.isValid(addresss.billing.pincode)) return res.status(400).send({ status: false, message: "pincode field is required or not valid" })
+    if (!validation.isValid(addresss.billing.pincode)) return res.status(400).send({ status: false, message: "pincode field is required" })
 
     if (!validation.isValidPincode(addresss.billing.pincode)) return res.status(400).send({ status: false, message: "PIN code should contain 6 digits only " })
 
 
 
     if (files && files.length == 0) {
-      //upload to s3 and get the uploaded link
-      // res.send the link back to frontend/postman
-
       return res.status(400).send({ msg: "No file found" })
     }
     let uploadedProfileImage = await aws.uploadFile(files[0])
@@ -86,7 +83,7 @@ const createUser = async function (req, res) {
 
     data.address = addresss
     let createUser = await userModel.create(data)
-    return res.status(201).send({ status: true, message: "user created successfully", data:createUser })
+    return res.status(201).send({ status: true, message: "user created successfully", data: createUser })
 
   }
   catch (err) {
@@ -116,7 +113,6 @@ const loginUser = async function (req, res) {
     res.status(200).send({ status: true, message: "User login successfully", data: { userId: findUser._id, token: token } })
 
 
-
   } catch (err) {
     res.status(500).send({ msg: "Error", error: err.message })
   }
@@ -126,9 +122,9 @@ const getUser = async (req, res) => {
   try {
     let userId = req.params.userId;
 
-    //getting the user document
     const user = await userModel.findOne({ _id: userId })
     return res.status(200).send({ status: true, message: 'User Profile Details', data: user })
+
   } catch (err) {
     res.status(500).send({ status: false, error: err.message })
   }
@@ -157,13 +153,13 @@ const updateUser = async function (req, res) {
       if (checkEmail) return res.status(409).send({ status: false, msg: "email already exist" })
     }
     if (password) {
-      if (!validation.isValid(password)) return res.status(400).send({ status: false, message: "Pasworrd is required or not valid" })
+      if (!validation.isValid(password)) return res.status(400).send({ status: false, message: "Pasworrd is required" })
       if (!validation.isValidPwd(password)) return res.status(400).send({ status: false, message: "Password length should be 8 to 15 digits and enter atleast one uppercase also one special character" })
 
       data.password = await bcrypt.hash(data.password, 10);
     }
     if (phone) {
-      if (!validation.isValid(phone)) return res.status(400).send({ status: false, message: "phone is required or not valid" })
+      if (!validation.isValid(phone)) return res.status(400).send({ status: false, message: "phone is required" })
       if (!validation.isValidNum(phone)) return res.status(400).send({ status: false, message: "phone number is not valid" })
       let checkPhone = await userModel.findOne({ phone: phone })
       if (checkPhone) return res.status(409).send({ status: false, msg: "Phone already exist" })

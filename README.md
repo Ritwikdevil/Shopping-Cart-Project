@@ -478,4 +478,16 @@ Refer below sample
   createdAt: "2021-09-17T04:25:07.803Z",
   updatedAt: "2021-09-17T04:25:07.803Z",
 }
-```
+
+# ```const invalid = {};  //validations
+#       if(size) {   
+#                size = [...new Set(size.toUpperCase().split(",").map((s)=>s.trim()))]; 
+#                const _enum = ["S", "XS", "M", "X", "L", "XXL", "XL"];
+#                for(let i=0; i<size.length; i++){
+#                if(_enum.indexOf(size[i]) === -1){
+#                   invalid['size error'] = `enter size from these set of elements only : ${_enum}`;
+#                   break;
+#                }
+#       }};
+#       if(size) filter.availableSizes = {$all:size};
+
