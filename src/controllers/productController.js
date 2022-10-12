@@ -64,14 +64,6 @@ const getProduct = async function (req, res) {
         let data = req.query;
         let conditions = { isDeleted: false };
 
-        //checking for any queries
-        if (validation.isValid(data)) {
-            //getting the products
-            let getProducts = await productModel.find(conditions).sort({ price: 1 });
-            if (getProducts.length == 0) return res.status(404).send({ status: false, message: "No products found" });
-
-            //   return res.status(200).send({ status: true, count: getProducts.length, message: "Success", data: getProducts })
-        }
 
         //validating the filter - SIZE
         if (data?.size || typeof data.size == 'string') {
