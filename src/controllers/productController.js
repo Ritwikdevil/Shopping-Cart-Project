@@ -121,4 +121,25 @@ const getProduct = async function (req, res) {
     }
 }
 
-module.exports = { createProduct, getProduct }
+
+const getProductsById = async (req, res) => {
+    try{
+      let productId = req.params.productId;
+  
+      //checking is product id is valid or not
+      if (!validation.isValidObjectId(productId)){
+        return res.status(400).send({ status: false, message: 'Please provide valid productId' })
+      }
+    
+      //getting the product by it's ID
+      const product = await productModel.findOne({ _id: productId, isDeleted:false})
+      if(!product) return res.status(404).send({ status: false, message:"No product found"})
+  
+      return res.status(200).send({ status: true, message: 'Success', data: product})
+    } catch (err) {
+      res.status(500).send({ status: false, error: err.message })
+    }
+  }
+  
+
+module.exports = { createProduct, getProduct,getProductsById }
