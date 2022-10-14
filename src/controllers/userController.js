@@ -28,21 +28,19 @@ const createUser = async function (req, res) {
 
     if (checkEmail) return res.status(409).send({ status: false, msg: "email already exist" })
 
+    if (!validation.isValid(phone)) return res.status(400).send({ status: false, message: "phone is required" })
+
+    if (!validation.isValidPhone(phone)) return res.status(400).send({ status: false, message: "phone number is not valid" })
+
+    let checkPhone = await userModel.findOne({ phone: phone })
+
+    if (checkPhone) return res.status(409).send({ status: false, msg: "Phone already exist" })
 
 
     if (!validation.isValid(password)) return res.status(400).send({ status: false, message: "Pasworrd is required" })
 
     if (!validation.isValidPwd(password)) return res.status(400).send({ status: false, message: "Password length should be 8 to 15 digits and enter atleast one uppercase also one special character" })
 
-
-
-    if (!validation.isValid(phone)) return res.status(400).send({ status: false, message: "phone is required" })
-
-    if (!validation.isValidNum(phone)) return res.status(400).send({ status: false, message: "phone number is not valid" })
-
-    let checkPhone = await userModel.findOne({ phone: phone })
-
-    if (checkPhone) return res.status(409).send({ status: false, msg: "Phone already exist" })
 
 
     if (!address) return res.status(400).send({ status: false, msg: "address requried" })
@@ -71,7 +69,7 @@ const createUser = async function (req, res) {
 
 
     if (files && files.length == 0) {
-      return res.status(400).send({ msg: "No file found" })
+      return res.status(400).send({ msg: "No profileImage found" })
     }
     let uploadedProfileImage = await aws.uploadFile(files[0])
 
@@ -99,14 +97,14 @@ const loginUser = async function (req, res) {
     if (validation.isValidBody(data)) return res.status(400).send({ status: false, msg: "please provide  details" })
     let { email, password } = data
 
-    if (!validation.isValid(email)) return res.status(400).send({ status: false, message: "email is required or not valid" })
-    if (!validation.isValid(password)) return res.status(400).send({ status: false, message: "Pasworrd is required or not valid" })
+    if (!validation.isValid(email)) return res.status(400).send({ status: false, message: "email is required" })
+    if (!validation.isValid(password)) return res.status(400).send({ status: false, message: "Pasworrd is required" })
 
     let findUser = await userModel.findOne({ email: email })
-    if (!findUser) return res.status(404).send({ status: false, message: "Email is wrong" })
+    if (!findUser) return res.status(404).send({ status: false, message: "the email id entered is wrong" })
 
     let bcryptPass = await bcrypt.compare(password, findUser.password)
-    if (!bcryptPass) return res.status(404).send({ status: false, message: "Password is wrong" })
+    if (!bcryptPass) return res.status(404).send({ status: false, message: "The entered password is wrong" })
 
     let token = jwt.sign({ userId: findUser._id }, "Products-Management", { expiresIn: '1d' });
 
@@ -166,7 +164,6 @@ const updateUser = async function (req, res) {
     }
     if (address) {
       address = JSON.parse(address)
-
       if (!validation.isValid(address.shipping.street)) return res.status(400).send({ status: false, message: "street field is required or not valid" })
       if (!validation.isValid(address.shipping.city)) return res.status(400).send({ status: false, message: "city field is required or not valid" })
       if (!validation.isValid(address.shipping.pincode)) return res.status(400).send({ status: false, message: "pincode field is required or not valid" })

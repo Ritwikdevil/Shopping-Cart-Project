@@ -11,7 +11,7 @@ const createProduct = async function (req, res) {
 
         if (validation.isValidBody(data)) return res.status(400).send({ status: false, msg: "please provide  details" })
 
-        if (!validation.isValid(title)) return res.status(400).send({ status: false, message: "first name is required" })
+        if (!validation.isValid(title)) return res.status(400).send({ status: false, message: "title is required" })
         let checkTitle = await productModel.findOne({ title: title })
         if (checkTitle) return res.status(409).send({ status: false, message: "title already exist enter another title" })
 
@@ -23,18 +23,15 @@ const createProduct = async function (req, res) {
         if (!validation.isValid(currencyId)) return res.status(400).send({ status: false, message: "currencyId is required" })
         if (currencyId != "INR") return res.status(400).send({ status: false, message: "CurrencyId Should be INR only & in UpperCase" })
 
-        if (!validation.isValid(currencyId)) return res.status(400).send({ status: false, message: "currencyId is required" })
-        if (currencyId != "INR") return res.status(400).send({ status: false, message: "CurrencyId Should be INR only & in UpperCase" })
-
         if (isFreeShipping) {
             if (isFreeShipping != true || false) return res.status(400).send({ status: false, message: "isFreeShipping only contain a boolean value" })
         }
 
         if (!validation.isValid(availableSizes)) return res.status(400).send({ status: false, message: "availableSize is required" })
 
-        availableSizes = availableSizes.split(',').map((item) => item.trim())
+        availableSizes = availableSizes.toUpperCase().split(',').map((item) => item.trim())
         for (let i = 0; i < availableSizes.length; i++) {
-            if (!validation.isValidSize(availableSizes[i])) return res.status(400).send({ status: false, message: "Please mention valid Size!" });
+            if (!validation.isValidSize(availableSizes[i])) return res.status(400).send({ status: false, message: `Please mention valid Size between ${["S", "XS", "M", "X", "L", "XXL", "XL"]}` });
         }
         data.availableSizes = availableSizes
 
@@ -43,12 +40,11 @@ const createProduct = async function (req, res) {
         }
 
         if (files && files.length == 0) {
-            return res.status(400).send({ msg: "No file found" })
+            return res.status(400).send({ msg: "No productImage found" })
         }
         let uploadedProductImage = await aws.uploadFile(files[0])
 
         data.productImage = uploadedProductImage
-        data.deletedAt = null
         data.currencyFormat = "₹"
 
         let createProduct = await productModel.create(data)
@@ -152,8 +148,10 @@ const updateProduct = async function (req, res) {
         let { title, price, isFreeShipping, availableSizes, installments } = data
 
         if (validation.isValidBody(data)) return res.status(400).send({ status: false, message: "please put required input to update" })
-
+        
         if (!validation.isValidObjectId(productId)) return res.status(400).send({ status: false, message: "provide a valid productId" })
+        let findProduct = await productModel.findOne({ _id: productId })
+        if (!findProduct) return res.status(404).send({ status: false, message: "Product is not found" })
 
         if (title) {
             if (checkTitle) return res.status(409).send({ status: false, message: "title already exist enter another title" })
@@ -166,7 +164,7 @@ const updateProduct = async function (req, res) {
             if (isFreeShipping != true && isFreeShipping != false) return res.status(400).send({ status: false, message: "isFreeShipping only contain a boolean value" })
         }
         if (availableSizes) {
-            availableSizes = availableSizes.split(',').map((item) => item.trim())
+            availableSizes = availableSizes.toUpperCase().split(',').map((item) => item.trim())
             for (let i = 0; i < availableSizes.length; i++) {
                 if (!validation.isValidSize(availableSizes[i])) return res.status(400).send({ status: false, message: "Please mention valid Size!" });
             }
@@ -174,14 +172,16 @@ const updateProduct = async function (req, res) {
         if (installments) {
             if (!validation.isValidNum(installments)) return res.status(400).send({ status: false, message: "please enter a valid installment number" })
         }
-        let findavailableSizes = await productModel.findOne({ _id: productId })
-        let sizeArray = findavailableSizes.availableSizes
-        for (let i = 0; i < sizeArray.length; i++) {
-            availableSizes.push(sizeArray[i])
+        if (availableSizes) {
+            
+            let sizeArray = findProduct.availableSizes
+            for (let i = 0; i < sizeArray.length; i++) {
+                availableSizes.push(sizeArray[i])
+            }
+            let result = [... new Set(availableSizes)]
+            data.availableSizes = result
+            
         }
-
-        let result = [... new Set(availableSizes)]
-        data.availableSizes = result
 
         if (files.length != 0) {
             if (files && files.length == 0) {
@@ -214,7 +214,7 @@ const deleteProduct = async function (req, res) {
 
         if (!findProduct) return res.status(404).send({ status: false, message: "Product is not found" })
         if (findProduct.isDeleted == true) return res.status(404).send({ status: false, message: "Product is already delted" })
-        await productModel.findOneAndUpdate({ _id: productId},
+        await productModel.findOneAndUpdate({ _id: productId },
             { $set: { isDeleted: true, deletedAt: new Date() } })
 
         return res.status(200).send({ status: true, message: "Product has been deleted successfully" })
