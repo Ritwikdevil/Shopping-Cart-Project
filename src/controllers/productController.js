@@ -115,9 +115,10 @@ const getProduct = async function (req, res) {
         res.status(200).send({ status: true, count: getFilterData.length, message: "Success", data: getFilterData })
 
     } catch (err) {
-        res.status(500).send({ msg: "Error", error: err.message })
-    }
+        res.status(500).send({ msg: "Error", error: err.message })
+    }
 }
+
 
 
 const getProductsById = async (req, res) => {
