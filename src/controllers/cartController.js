@@ -154,7 +154,7 @@ const updateCart = async function (req, res) {
                 return res.status(400).send({ status: false, message: "Product is not in the cart" })
             }
             const updatedCart = await cartModel.findOneAndUpdate({ _id: cartId }, ({ items: itemsArr, totalPrice: totalPrice, totalItems: totalItems }), { new: true }).select({ __v: 0 })
-            res.status(200).send({ status: false, message: "Success", data: updatedCart })
+            res.status(200).send({ status: true, message: "Success", data: updatedCart })
 
 
         }
@@ -176,7 +176,7 @@ const updateCart = async function (req, res) {
             }
 
             const updatedCart = await cartModel.findOneAndUpdate({ _id: cartId }, ({ items: itemsArr, totalPrice: totalPrice, totalItems: totalItems }), { new: true }).select({ __v: 0 })
-            res.status(201).send({ status: false, message: "Success", data: updatedCart })
+            res.status(200).send({ status: true, message: "Success", data: updatedCart })
         }
 
 

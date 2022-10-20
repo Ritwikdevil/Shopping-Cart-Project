@@ -92,7 +92,7 @@ const updateOrder = async function (req, res) {
             if (findOrder.status == "cancelled") return res.status(400).send({ status: false, message: "This order is already cancelled" })
 
             let updateOrder = await orderModel.findOneAndUpdate({ _id: orderId }, { status: "cancelled" }, { new: true })
-            return res.status(201).send({ status: true, message: "Success", data: updateOrder })
+            return res.status(200).send({ status: true, message: "Success", data: updateOrder })
         }
         if (status == "completed") {
 
@@ -101,7 +101,7 @@ const updateOrder = async function (req, res) {
             if (findOrder.status == "cancelled") return res.status(400).send({ status: false, message: "This order is already cancelled , after cancellation you can't update it to completed" })
 
             let updateOrder = await orderModel.findOneAndUpdate({ _id: orderId }, { status: "completed" }, { new: true })
-            return res.status(201).send({ status: true, message: "Success", data: updateOrder })
+            return res.status(200).send({ status: true, message: "Success", data: updateOrder })
 
         }
         if (status == "pending") {

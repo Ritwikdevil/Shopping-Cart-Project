@@ -15,7 +15,11 @@ mongoose.connect("mongodb+srv://group47:IzQG26fl0fyXl9IN@cluster0.oxrsqmy.mongod
 .then( () => console.log("MongoDb is connected"))
 .catch ( err => console.log(err) )
 
-app.use('/', route);
+app.use('/', route)
+
+// app.use((req, res) => {
+//     return res.status(400).send({ status: false, message: "End point is incorrect" })
+// });
 
 
 app.listen(process.env.PORT || 3000, function () {

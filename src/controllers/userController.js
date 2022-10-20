@@ -14,6 +14,7 @@ const createUser = async function (req, res) {
     if (validation.isValidBody(data)) return res.status(400).send({ status: false, msg: "please provide  details" })
 
     if (!validation.isValid(fname)) return res.status(400).send({ status: false, message: "first name is required" })
+
     if (!validation.isValidName(fname)) return res.status(400).send({ status: false, message: "first name is not valid" })
 
     if (!validation.isValid(lname)) return res.status(400).send({ status: false, message: "last name is required" })
@@ -21,65 +22,47 @@ const createUser = async function (req, res) {
 
 
     if (!validation.isValid(email)) return res.status(400).send({ status: false, message: "email is required" })
-
     if (!validation.isValidEmail(email)) return res.status(400).send({ status: false, message: "email is not valid" })
-
     let checkEmail = await userModel.findOne({ email: email })
-
     if (checkEmail) return res.status(409).send({ status: false, msg: "email already exist" })
 
     if (!validation.isValid(phone)) return res.status(400).send({ status: false, message: "phone is required" })
-
     if (!validation.isValidPhone(phone)) return res.status(400).send({ status: false, message: "phone number is not valid" })
-
     let checkPhone = await userModel.findOne({ phone: phone })
-
     if (checkPhone) return res.status(409).send({ status: false, msg: "Phone already exist" })
 
 
     if (!validation.isValid(password)) return res.status(400).send({ status: false, message: "Pasworrd is required" })
-
     if (!validation.isValidPwd(password)) return res.status(400).send({ status: false, message: "Password length should be 8 to 15 digits and enter atleast one uppercase also one special character" })
 
-
-
     if (!address) return res.status(400).send({ status: false, msg: "address requried" })
-    var addresss = JSON.parse(address)
 
+    address = JSON.parse(address)
 
-    if (!validation.isValid(addresss.shipping.street)) return res.status(400).send({ status: false, message: "street field is required" })
+    if (Object.keys(address) == 0) return res.status(400).send({ status: false, message: "address field can't be empty" })
 
-    if (!validation.isValid(addresss.shipping.city)) return res.status(400).send({ status: false, message: "city field is required" })
+    if (!validation.isValid(address.shipping.street)) return res.status(400).send({ status: false, message: "street field is required" })
+    if (!validation.isValid(address.shipping.city)) return res.status(400).send({ status: false, message: "city field is required" })
+    if (!validation.isValid(address.shipping.pincode)) return res.status(400).send({ status: false, message: "pincode field is required" })
+    if (!validation.isValidPincode(address.shipping.pincode)) return res.status(400).send({ status: false, message: "PIN code should contain 6 digits only " })
 
-    if (!validation.isValid(addresss.shipping.pincode)) return res.status(400).send({ status: false, message: "pincode field is required" })
-
-    if (!validation.isValidPincode(addresss.shipping.pincode)) return res.status(400).send({ status: false, message: "PIN code should contain 6 digits only " })
-
-
-
-
-    if (!validation.isValid(addresss.billing.street)) return res.status(400).send({ status: false, message: "street field is required" })
-
-    if (!validation.isValid(addresss.billing.city)) return res.status(400).send({ status: false, message: "city field is required" })
-
-    if (!validation.isValid(addresss.billing.pincode)) return res.status(400).send({ status: false, message: "pincode field is required" })
-
-    if (!validation.isValidPincode(addresss.billing.pincode)) return res.status(400).send({ status: false, message: "PIN code should contain 6 digits only " })
-
+    if (!validation.isValid(address.billing.street)) return res.status(400).send({ status: false, message: "street field is required" })
+    if (!validation.isValid(address.billing.city)) return res.status(400).send({ status: false, message: "city field is required" })
+    if (!validation.isValid(address.billing.pincode)) return res.status(400).send({ status: false, message: "pincode field is required" })
+    if (!validation.isValidPincode(address.billing.pincode)) return res.status(400).send({ status: false, message: "PIN code should contain 6 digits only " })
+    data.address = address
 
 
     if (files && files.length == 0) {
       return res.status(400).send({ msg: "No profileImage found" })
     }
     let uploadedProfileImage = await aws.uploadFile(files[0])
-
     data.profileImage = uploadedProfileImage
 
     const saltRounds = 10
     const hash = bcrypt.hashSync(password, saltRounds)
     data.password = hash
 
-    data.address = addresss
     let createUser = await userModel.create(data)
     return res.status(201).send({ status: true, message: "user created successfully", data: createUser })
 
@@ -162,19 +145,23 @@ const updateUser = async function (req, res) {
       let checkPhone = await userModel.findOne({ phone: phone })
       if (checkPhone) return res.status(409).send({ status: false, msg: "Phone already exist" })
     }
-    if (address) {
+    if (address || address == "") {
+
+      if (!validation.isValid(address.trim())) return res.status(400).send({ status: false, message: "Enter a valid type of address" })
+
       address = JSON.parse(address)
-      if (!validation.isValid(address.shipping.street)) return res.status(400).send({ status: false, message: "street field is required or not valid" })
-      if (!validation.isValid(address.shipping.city)) return res.status(400).send({ status: false, message: "city field is required or not valid" })
-      if (!validation.isValid(address.shipping.pincode)) return res.status(400).send({ status: false, message: "pincode field is required or not valid" })
-      if (!validation.isValidPincode(address.shipping.pincode)) return res.status(400).send({ status: false, message: "PIN code should contain 6 digits only " })
+
+      if (!validation.isValid(address.shipping.street)) return res.status(400).send({ status: false, message: "street field is required" })
+      if (!validation.isValid(address.shipping.city)) return res.status(400).send({ status: false, message: "city field is required" })
+      if (!validation.isValid(address.shipping.pincode)) return res.status(400).send({ status: false, message: "pincode field is required" })
+      if (!validation.isValidPincode(address.shipping.pincode)) return res.status(400).send({ status: false, message: "Please enter a indian pincode correctly" })
 
 
-      if (!validation.isValid(address.billing.street)) return res.status(400).send({ status: false, message: "street field is required or not valid" })
-      if (!validation.isValid(address.billing.city)) return res.status(400).send({ status: false, message: "city field is required or not valid" })
-      if (!validation.isValid(address.billing.pincode)) return res.status(400).send({ status: false, message: "pincode field is required or not valid" })
-      if (!validation.isValidPincode(address.billing.pincode)) return res.status(400).send({ status: false, message: "PIN code should contain 6 digits only " })
-
+      if (!validation.isValid(address.billing.street)) return res.status(400).send({ status: false, message: "street field is required" })
+      if (!validation.isValid(address.billing.city)) return res.status(400).send({ status: false, message: "city field is required" })
+      if (!validation.isValid(address.billing.pincode)) return res.status(400).send({ status: false, message: "pincode field is required" })
+      if (!validation.isValidPincode(address.billing.pincode)) return res.status(400).send({ status: false, message: "Please enter a indian pincode correctly" })
+      data.address = address
     }
 
     if (files.length != 0) {
@@ -185,7 +172,7 @@ const updateUser = async function (req, res) {
       data.profileImage = uploadedFileURL
     }
 
-    data.address = address
+
 
     let updateUser = await userModel.findOneAndUpdate({ _id: userId }, { $set: data }, { new: true })
 
