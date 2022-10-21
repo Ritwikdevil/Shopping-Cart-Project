@@ -79,8 +79,9 @@ const updateOrder = async function (req, res) {
         if (status != "cancelled" && status != "completed" && status != "pending") return res.status(400).send({ status: false, message: "the status could either be cancelled or completed or pending!" })
 
         let findOrder = await orderModel.findById(orderId)
-        if (findOrder.isDeleted == true) return res.status(400).send({ status: false, message: "This order is already deleted you can't update" })
         if (!findOrder) return res.status(404).send({ status: false, message: "No order found with the give orderId" })
+        if (findOrder.isDeleted == true) return res.status(400).send({ status: false, message: "This order is already deleted you can't update" })
+       
 
         if (findOrder.userId.toString() != userId) return res.status(400).send({ status: false, message: "This order doesnot belongs to your account" })
 
