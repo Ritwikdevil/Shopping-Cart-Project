@@ -35,9 +35,9 @@ router.put("/users/:userId/orders", authentication, authorization, orderControll
 
 
 
-router.all("/*/", async function (req, res){
+router.all("/*/", async function (req, res) {
 
-    res.status(404).send({status:false, msg: "Wrong url"})
+    res.status(404).send({ status: false, msg: "Wrong url" })
 })
 
 
